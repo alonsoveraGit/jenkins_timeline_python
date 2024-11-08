@@ -27,35 +27,37 @@ Antes de ejecutar los scripts, asegúrate de configurar las siguientes variables
 
 ## Scripts
 
-### `main_recursivo_generate_excel.py`
+### `main.py`
 
 Este script es el punto de entrada principal del proyecto. Realiza las siguientes acciones:
 
 1. **Carga de variables de entorno**: Utiliza `python-dotenv` para cargar las variables de entorno desde un archivo `.env`.
 2. **Obtención de datos de Jenkins**: Llama a funciones para obtener datos de Jenkins.
+3. **Visualización de datos**: Genera y muestra una gráfica de dispersión de los tiempos de ejecución de los trabajos.
+
+### `main_recursivo.py`
+
+Este script es una variante del script principal que implementa un enfoque recursivo para obtener y procesar los datos:
+
+1. **Obtención recursiva de datos**: Utiliza un enfoque recursivo para navegar por los datos de Jenkins.
+2. **Procesamiento de datos**: Filtra y organiza los datos obtenidos.
+3. **Visualización de datos**: Genera y muestra una gráfica de dispersión similar a `main.py`.
+
+### `main_recursivo_generate_excel.py`
+
+Este script extiende la funcionalidad de `main_recursivo.py` para incluir la generación de un archivo Excel:
+
+1. **Carga de variables de entorno**: Similar a los otros scripts, carga las variables de entorno necesarias.
+2. **Obtención y procesamiento de datos**: Utiliza un enfoque recursivo para obtener y procesar los datos de Jenkins.
 3. **Generación de Excel**: Procesa los datos obtenidos y los guarda en un archivo Excel utilizando `pandas`.
 4. **Visualización de datos**: Genera y muestra una gráfica de dispersión de los tiempos de ejecución de los trabajos.
 
-### `data_fetcher.py`
-
-Este script contiene funciones para interactuar con la API de Jenkins:
-
-- **`get_jenkins_data(url)`**: Realiza una solicitud GET a la URL proporcionada y devuelve los datos en formato JSON.
-- **Funciones adicionales**: Podría incluir funciones para filtrar y procesar los datos obtenidos.
-
-### `plotter.py`
-
-Este script se encarga de la visualización de los datos:
-
-- **Generación de gráficas**: Utiliza `matplotlib` para crear gráficas de dispersión que muestran los tiempos de ejecución de los trabajos.
-- **Configuración de gráficos**: Configura aspectos visuales de las gráficas, como etiquetas y formatos de fecha.
-
 ## Ejecución
 
-Para ejecutar el script principal, simplemente corre el siguiente comando en tu terminal:
+Para ejecutar cualquiera de los scripts, simplemente corre el siguiente comando en tu terminal, reemplazando `<script_name>` con el nombre del script que deseas ejecutar:
 
 ```bash
-python main_recursivo_generate_excel.py
+python <script_name>.py
 ```
 
-Esto generará un archivo Excel con los datos de ejecución y mostrará una gráfica de dispersión con los tiempos de ejecución de los trabajos en Jenkins para el rango de tiempo especificado.
+Esto generará y mostrará una gráfica de dispersión con los tiempos de ejecución de los trabajos en Jenkins para el rango de tiempo especificado, y en el caso de `main_recursivo_generate_excel.py`, también generará un archivo Excel con los datos.
