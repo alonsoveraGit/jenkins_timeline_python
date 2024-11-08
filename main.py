@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import urllib3
 from dotenv import load_dotenv
 import os
+import pandas as pd
 
 # Cargar variables de entorno desde .env
 load_dotenv()
@@ -23,21 +24,38 @@ def get_jenkins_data(url):
     response.raise_for_status()
     return response.json()
 
-# Obtener la lista de todos los trabajos
-jobs_url = f"{JENKINS_URL}/api/json?tree=jobs[name,url]"
-jobs_data = get_jenkins_data(jobs_url)
+# Función para obtener trabajos de Jenkins, incluyendo subcarpetas
+def get_all_jobs(url):
+    jobs_data = get_jenkins_data(url)
+    all_jobs = []
+    
+    for job in jobs_data['jobs']:
+        if job['_class'] == 'com.cloudbees.hudson.plugins.folder.Folder':
+            # Si es una carpeta, buscar trabajos dentro de ella
+            folder_url = f"{job['url']}api/json?tree=jobs[name,url,_class,description]"
+            all_jobs.extend(get_all_jobs(folder_url))
+        else:
+            # Si es un trabajo, añadirlo a la lista
+            all_jobs.append(job)
+    
+    return all_jobs
+
+# Obtener la lista de todos los trabajos, incluyendo los de subcarpetas
+jobs_url = f"{JENKINS_URL}/api/json?tree=jobs[name,url,_class]"
+all_jobs = get_all_jobs(jobs_url)
 
 build_times = []
 
 # Definir el rango de tiempo para hoy desde las 00:00 hasta las 09:00
-today = datetime(2024, 8, 8)
+today = datetime(2024, 11, 7)
 start_time = today
-end_time = today + timedelta(hours=9)
+end_time = today + timedelta(hours=24)
 
 # Obtener detalles de las ejecuciones de cada trabajo
-for job in jobs_data['jobs']:
+for job in all_jobs:
     job_name = job['name']
     job_url = job['url']
+    job_description = job.get('description', 'No description')  # Obtener la descripción
     
     builds_url = f"{job_url}api/json?tree=builds[number,url,timestamp,duration]"
     builds_data = get_jenkins_data(builds_url)
@@ -51,9 +69,13 @@ for job in jobs_data['jobs']:
             if start_time <= build_timestamp <= end_time:
                 build_times.append({
                     'job_name': job_name,
+                    'description': job_description,  # Añadir la descripción
                     'start_time': build_timestamp,
                     'duration': timedelta(milliseconds=build['duration'])
                 })
+            else:
+                print(f"Build fuera de rango: {build_timestamp} para el trabajo {job_name}")
+                print(f"Rango esperado: {start_time} a {end_time}")
 
 # Ordenar los datos por start_time
 build_times.sort(key=lambda x: x['start_time'])
@@ -74,9 +96,20 @@ ax.xaxis_date()
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
 ax.set_xlabel('Hora')
 ax.set_ylabel('Tareas')
-ax.set_title('Diagrama de Gantt de ejecuciones de trabajos en Jenkins (08/08/2024 de 00:00 a 09:00)')
+ax.set_title(f'Diagrama de Gantt de ejecuciones de trabajos en Jenkins ({today.strftime("%d/%m/%Y")} de 00:00 a 09:00)')
 plt.xticks(rotation=45)
 plt.tight_layout()
+
+
+
+# Crear un DataFrame con los datos de las ejecuciones
+df = pd.DataFrame(build_times)
+
+# Añadir una columna para la hora de fin
+df['end_time'] = df['start_time'] + df['duration']
+
+# Guardar el DataFrame en un archivo Excel
+df.to_excel('jenkins_builds.xlsx', index=False, columns=['job_name', 'description', 'start_time', 'end_time', 'duration'])
 
 # Mostrar la gráfica
 plt.show()
