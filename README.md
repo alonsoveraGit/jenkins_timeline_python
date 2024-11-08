@@ -8,16 +8,18 @@ Este proyecto obtiene y visualiza los tiempos de ejecución de los trabajos en J
 - `requests`
 - `matplotlib`
 - `urllib3`
+- `pandas`
+- `python-dotenv`
 
 Puedes instalar las dependencias necesarias con el siguiente comando:
 
 ```bash
-pip install requests matplotlib urllib3
+pip install -r requirements.txt
 ```
 
 ## Configuración
 
-Antes de ejecutar los scripts, asegúrate de configurar las siguientes variables en el archivo `config.py`:
+Antes de ejecutar los scripts, asegúrate de configurar las siguientes variables en un archivo `.env`:
 
 - `JENKINS_URL`: La URL de tu servidor Jenkins.
 - `USER`: Tu nombre de usuario de Jenkins.
@@ -25,36 +27,35 @@ Antes de ejecutar los scripts, asegúrate de configurar las siguientes variables
 
 ## Scripts
 
-El proyecto incluye los siguientes scripts:
+### `main_recursivo_generate_excel.py`
 
-1. **`main.py`**: Realiza la obtención y visualización de los tiempos de ejecución de los trabajos en Jenkins.
+Este script es el punto de entrada principal del proyecto. Realiza las siguientes acciones:
 
-2. **`data_fetcher.py`**: Contiene funciones para obtener datos de Jenkins, incluyendo la función `get_jenkins_data(url)` que realiza una solicitud GET a la URL proporcionada y devuelve los datos en formato JSON.
+1. **Carga de variables de entorno**: Utiliza `python-dotenv` para cargar las variables de entorno desde un archivo `.env`.
+2. **Obtención de datos de Jenkins**: Llama a funciones para obtener datos de Jenkins.
+3. **Generación de Excel**: Procesa los datos obtenidos y los guarda en un archivo Excel utilizando `pandas`.
+4. **Visualización de datos**: Genera y muestra una gráfica de dispersión de los tiempos de ejecución de los trabajos.
 
-3. **`plotter.py`**: Utiliza `matplotlib` para crear y mostrar una gráfica de dispersión que muestra los tiempos de ejecución de los trabajos en el rango de tiempo especificado.
+### `data_fetcher.py`
 
-## Uso
+Este script contiene funciones para interactuar con la API de Jenkins:
 
-Los scripts realizan las siguientes acciones:
+- **`get_jenkins_data(url)`**: Realiza una solicitud GET a la URL proporcionada y devuelve los datos en formato JSON.
+- **Funciones adicionales**: Podría incluir funciones para filtrar y procesar los datos obtenidos.
 
-1. **Desactiva las advertencias de solicitudes HTTPS no verificadas**: Utiliza `urllib3` para desactivar las advertencias de seguridad cuando se realizan solicitudes HTTPS sin verificación SSL.
+### `plotter.py`
 
-2. **Obtiene datos de Jenkins**: Utiliza `data_fetcher.py` para obtener la lista de todos los trabajos en Jenkins.
+Este script se encarga de la visualización de los datos:
 
-3. **Define el rango de tiempo**: Establece un rango de tiempo específico (desde las 00:00 hasta las 09:00 del 08/08/2024).
-
-4. **Obtiene detalles de las ejecuciones de cada trabajo**: Para cada trabajo, obtiene los detalles de las ejecuciones y filtra las ejecuciones que ocurrieron dentro del rango de tiempo especificado.
-
-5. **Ordena los datos**: Ordena los datos de las ejecuciones por timestamp.
-
-6. **Crea y muestra la gráfica**: Utiliza `plotter.py` para crear y mostrar la gráfica generada.
+- **Generación de gráficas**: Utiliza `matplotlib` para crear gráficas de dispersión que muestran los tiempos de ejecución de los trabajos.
+- **Configuración de gráficos**: Configura aspectos visuales de las gráficas, como etiquetas y formatos de fecha.
 
 ## Ejecución
 
 Para ejecutar el script principal, simplemente corre el siguiente comando en tu terminal:
 
 ```bash
-python main.py
+python main_recursivo_generate_excel.py
 ```
 
-Esto generará y mostrará una gráfica de dispersión con los tiempos de ejecución de los trabajos en Jenkins para el rango de tiempo especificado.
+Esto generará un archivo Excel con los datos de ejecución y mostrará una gráfica de dispersión con los tiempos de ejecución de los trabajos en Jenkins para el rango de tiempo especificado.
